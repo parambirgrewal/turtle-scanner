@@ -1,0 +1,50 @@
+name: Turtle scan
+
+on:
+  schedule:
+    # every 15 min, 03:00-10:59 UTC (= 08:30-16:29 IST), Mon-Fri. The script decides what to do by IST time.
+    - cron: "*/15 3-10 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "auto, intraday or final (use final to test any time)"
+        default: "auto"
+
+concurrency:
+  group: turtle-scan
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Restore state (remembers what was already sent today)
+        uses: actions/cache/restore@v4
+        with:
+          path: state.json
+          key: scan-state-${{ github.run_id }}
+          restore-keys: scan-state-
+
+      - name: Run scanner
+        run: python turtle_scanner.py
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          MODE: ${{ github.event.inputs.mode || 'auto' }}
+
+      - name: Save state
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: state.json
+          key: scan-state-${{ github.run_id }}

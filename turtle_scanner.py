@@ -40,8 +40,9 @@ CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 MODE = (os.getenv("MODE", "auto") or "auto").lower()      # auto | intraday | final
 DRY_RUN = os.getenv("DRY_RUN", "") == "1"
 
-DISCLAIMER = ("⚠️ Educational signal only. Not investment advice. Not a SEBI-registered Research Analyst. "
-              "Trading decisions are solely your responsibility.")
+DISCLAIMER = ("⚠️ DISCLAIMER: This platform is for personal research and educational purposes only. "
+              "It does not constitute investment advice, a research report, or a recommendation to buy or sell any security. "
+              "The author is not a SEBI-registered Research Analyst.")
 
 FALLBACK_UNIVERSE = """RELIANCE TCS HDFCBANK ICICIBANK INFY BHARTIARTL SBIN LT ITC HINDUNILVR KOTAKBANK AXISBANK
 BAJFINANCE MARUTI SUNPHARMA TITAN ASIANPAINT ULTRACEMCO NTPC POWERGRID ONGC COALINDIA TATASTEEL JSWSTEEL HCLTECH
@@ -448,7 +449,9 @@ def main():
     if mode == "intraday":
         fresh = [s for s in signals if s["sym"] not in state["seen"]]
         if fresh:
-            ok = send(format_signals(fresh, mode, now, scanned, len(universe)))
+            msg = format_signals(fresh, mode, now, scanned, len(universe))
+            msg += "\n\n" + DISCLAIMER
+            ok = send(msg)
             if ok and not forced:
                 state["seen"] += [s["sym"] for s in fresh]
         else:

@@ -1,9 +1,8 @@
 name: Turtle scan
 
 on:
-  schedule:
-    # every 15 min, 03:00-10:59 UTC (= 08:30-16:29 IST), Mon-Fri. The script decides what to do by IST time.
-    - cron: "*/15 3-10 * * 1-5"
+  # Scheduled execution migrated to Google Apps Script on 2026-10-25.
+  # Original configuration is preserved on backup-before-apps-script-2026-10-25.
   workflow_dispatch:
     inputs:
       mode:
